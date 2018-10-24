@@ -22,8 +22,11 @@ class Transaction {
    *     other properties, signed with the provided private key
    */
   constructor(privateKey, recipient, amount) {
-    // Enter your solution here
-
+    this.source = signing.getPublicKey(privateKey);
+    this.recipient = recipient;
+    this.amount = amount;
+    this.message = this.source + recipient + amount;
+    this.signature = signing.sign(privateKey, this.message);
   }
 }
 
@@ -44,8 +47,9 @@ class Block {
    *   - hash: a unique hash string generated from the other properties
    */
   constructor(transactions, previousHash) {
-    // Your code here
-
+    this.transactions = transactions;
+    this.previousHash = previousHash;
+    this.calculateHash();
   }
 
   /**
@@ -58,8 +62,10 @@ class Block {
    *   properties change.
    */
   calculateHash(nonce) {
-    // Your code here
-
+    let hash = createHash('sha256');
+    let string = JSON.stringify(this.transactions) + this.previousHash + nonce;
+    this.nonce = nonce;
+    this.hash = hash.update(string).digest('hex');
   }
 }
 
@@ -78,16 +84,14 @@ class Blockchain {
    *   - blocks: an array of blocks, starting with one genesis block
    */
   constructor() {
-    // Your code here
-
+    this.blocks = [new Block([], null)];
   }
 
   /**
    * Simply returns the last block added to the chain.
    */
   getHeadBlock() {
-    // Your code here
-
+    return this.blocks[this.blocks.length-1];
   }
 
   /**
@@ -95,8 +99,8 @@ class Blockchain {
    * adding it to the chain.
    */
   addBlock(transactions) {
-    // Your code here
-
+    let prevBlock = this.getHeadBlock();
+    this.blocks.push(new Block(transactions, prevBlock.hash))
   }
 
   /**
@@ -109,8 +113,20 @@ class Blockchain {
    *   we make the blockchain mineable later.
    */
   getBalance(publicKey) {
-    // Your code here
-
+    // this.blocks = array of blocks
+    return this.blocks.reduce((balance, block) => {
+      return balance + block.transactions.reduce((sum, transaction) => {
+        // if the publicKey matches the recipient, add to sum
+        if (transaction.recipient === publicKey) {
+          return sum + transaction.amount;
+        }
+        // if the publicKey matches the source, subtract from sum
+        if (transaction.source === publicKey) {
+          return sum - transaction.amount;
+        }
+        return sum;
+      }, 0);
+    }, 0);
   }
 }
 
