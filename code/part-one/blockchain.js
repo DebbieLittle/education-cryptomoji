@@ -62,10 +62,10 @@ class Block {
    *   properties change.
    */
   calculateHash(nonce) {
-    let hash = createHash('sha256');
-    let string = JSON.stringify(this.transactions) + this.previousHash + nonce;
+    const transactionString = this.transactions.map(t => t.signature).join('');
+    const toHash = this.previousHash + transactionString + nonce;
     this.nonce = nonce;
-    this.hash = hash.update(string).digest('hex');
+    this.hash = createHash('sha512').update(toHash).digest('hex');
   }
 }
 
