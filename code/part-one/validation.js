@@ -50,11 +50,9 @@ const isValidChain = blockchain => {
   const { blocks } = blockchain;
   if (blocks[0].previousHash !== null) {
     return false;
-  }
-  if (blocks.slice(1).some((b, i) => b.previousHash !== blocks[i].hash)) {
+  } else if (blocks.slice(1).some((b, i) => b.previousHash !== blocks[i].hash)) {
     return false;
-  }
-  if (blocks.some(b => isValidBlock(b) === false)) {
+  } else if (blocks.some(b => isValidBlock(b) === false)) {
     return false;
   }
   return true;
@@ -66,7 +64,7 @@ const isValidChain = blockchain => {
  * (in theory) make the blockchain fail later validation checks;
  */
 const breakChain = blockchain => {
-  blockchain.blocks[1].previousHash = null
+  blockchain.blocks[1].previousHash = null;
 };
 
 module.exports = {
